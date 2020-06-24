@@ -61,7 +61,7 @@ for table in tables:
 
     output_dicts.append(output_dict)
 
-with open('test.csv', 'w') as f:
+with open('test.csv', 'w', encoding='utf-8') as f:
     w = csv.DictWriter(f, fieldnames)
     w.writeheader()
     for output_dict in output_dicts:
