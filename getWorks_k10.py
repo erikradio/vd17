@@ -13,7 +13,7 @@ import codecs
 
 # Neumark, Georg - 118587404  k10:233, vd: 62
 
-# Stubenberg, Johann Wilhelm Herr von - 118756141  k10:166, vd: 47
+# Stubenberg, Johann Wilhelm Herr von - 118756141
 
 csvfile =sys.argv[1]
 # collection=sys.argv[3]
@@ -22,7 +22,7 @@ with open(sys.argv[1], 'rU', errors='ignore') as csvFile:
     for row in reader:
         gnd = row['GND-Nummer']
         # url = 'https://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.gnd='+ gnd + '&maximumRecords=500&startRecord=1&recordSchema=mods'
-        url = 'https://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.gnd=118756141&maximumRecords=500&startRecord=1&recordSchema=mods'
+        url = 'https://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.gnd=118756141&maximumRecords=500&startRecord=1&recordSchema=marcxml'
         r = requests.get(url)
         r.encoding = 'utf-8'
         r.raise_for_status()
@@ -36,7 +36,7 @@ with open(sys.argv[1], 'rU', errors='ignore') as csvFile:
 
         vdResponse = r.text
 
-        
+
 
         newFile=open('k10_'+gnd+'.xml','w', encoding ='utf8')
         newFile.write(vdResponse)
