@@ -6,9 +6,11 @@ import requests
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 
-fieldnames = ['title', 'author', 'date', 'place_of_publication','publisher', 'id_control_number', 'id_national_bibliographic_control_number', 'id_other_standard_identifier','id_system_control_number']
+fieldnames = ['title', 'form', 'leader', 'author', 'date', 'place_of_publication','publisher',' TOC', 'content_type', 'media_type', 'carrier_type', 'id_control_number', 'id_national_bibliographic_control_number', 'id_other_standard_identifier','id_system_control_number']
 ns = {'zs':'http://www.loc.gov/zing/srw/'}
 ET.register_namespace('zs', 'http://www.loc.gov/zing/srw/')
+
+microfilms = ['a', 'b','c','f','o','q']
 
     # do your stuff
 with open(sys.argv[1], 'r') as xmlfile:
@@ -30,6 +32,17 @@ with open(sys.argv[1], 'r') as xmlfile:
             title = x.text
             output_dict['title'] = title
 
+        for x in record.findall('{http://www.loc.gov/MARC21/slim}leader'):
+            leader = x.text[6]
+            if leader in microfilms:
+                output_dict['leader'] = 'microfilm'
+            else:
+                output_dict['leader'] = leader
+
+        for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="300"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]'):
+            form = x.text
+            output_dict['form'] = form
+
         for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="100"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]'):
             author = x.text
             output_dict['author'] = author
@@ -46,6 +59,22 @@ with open(sys.argv[1], 'r') as xmlfile:
         for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="264"]/{http://www.loc.gov/MARC21/slim}subfield[@code="b"]'):
             publisher = x.text
             output_dict['publisher'] = publisher
+
+        for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="336"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]'):
+            contentType = x.text
+            output_dict['content_type'] = contentType
+
+        for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="337"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]'):
+            mediaType = x.text
+            output_dict['media_type'] = mediaType
+
+        for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="338"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]'):
+            carrierType = x.text
+            output_dict['carrier_type'] = carrierType
+
+        for x in record.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="505"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]'):
+            TOC = x.text
+            output_dict['TOC'] = TOC
 
         for x in record.findall('{http://www.loc.gov/MARC21/slim}controlfield[@tag="001"]'):
             id_control_number = x.text
@@ -67,7 +96,7 @@ with open(sys.argv[1], 'r') as xmlfile:
 
 
         output_dicts.append(output_dict)
-        print(output_dicts)
+        # print(output_dicts)
 
 
         with open("output.csv", "w") as f:
