@@ -19,6 +19,8 @@ from pathlib import Path
 def getData(record):
     bib = []
     data = {}
+    sevenxxdata = {}
+    onexxdata = {}
     roles = defaultdict(list)
     roleList = []
 
@@ -30,15 +32,23 @@ def getData(record):
         else:
             data['title'] = ''
         #  author
+        # for nameField in marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="100"]'):
+        #     # print(name.attrib)
+        #     if nameField is not None:
+        #         code = nameField.find('{http://www.loc.gov/MARC21/slim}subfield[@code="4"]')
+        #         name = nameField.find('{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
+        #         if code.text == 'aut':
+        #             data['author'] = name.text
+        #     else:
+        #         data['author'] = ''
         for nameField in marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="100"]'):
             # print(name.attrib)
-            if nameField is not None:
-                code = nameField.find('{http://www.loc.gov/MARC21/slim}subfield[@code="4"]')
-                name = nameField.find('{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
-                if code.text == 'aut':
-                    data['author'] = name.text
-            else:
-                data['author'] = ''
+            codes = nameField.findall('{http://www.loc.gov/MARC21/slim}subfield[@code="4"]')
+            for code in codes:
+                names = nameField.findall('{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
+                for name in names:
+                    roles[code.text].append(name.text)
+        # data.update(roles)
 
 
         # publisher
@@ -71,6 +81,14 @@ def getData(record):
             data['genre'] = genre.text
         else:
             data['genre'] = ''
+
+        vd17ID = marc.find('{http://www.loc.gov/MARC21/slim}datafield[@tag="024"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
+        if vd17ID is not None:
+            data['id'] = vd17ID.text
+        else:
+            data['id'] = ''
+
+
         # various roles
 
 
@@ -84,10 +102,11 @@ def getData(record):
         data.update(roles)
 
         bib.append(data)
+
         # print(data)
 
     # ['aut', 'dte', 'ctb', 'prt',hnr]
-        print(bib)
+        # print(bib)
     return bib
 
 
