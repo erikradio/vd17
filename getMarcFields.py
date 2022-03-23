@@ -19,10 +19,9 @@ from pathlib import Path
 def getData(record):
     bib = []
     data = {}
-    sevenxxdata = {}
-    onexxdata = {}
     roles = defaultdict(list)
     roleList = []
+    langList = []
 
     for marc in record.findall('{http://www.loc.gov/MARC21/slim}record'):
         # title
@@ -31,6 +30,11 @@ def getData(record):
             data['title'] = title.text
         else:
             data['title'] = ''
+        subtitle=marc.find('{http://www.loc.gov/MARC21/slim}datafield[@tag="245"]/{http://www.loc.gov/MARC21/slim}subfield[@code="b"]')
+        if subtitle is not None:
+            data['subtitle'] = title.text
+        else:
+            data['subtitle'] = ''
         #  author
         # for nameField in marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="100"]'):
         #     # print(name.attrib)
@@ -49,6 +53,17 @@ def getData(record):
                 for name in names:
                     roles[code.text].append(name.text)
         # data.update(roles)
+
+        #marc 751 if subfield 4 is 'pup'
+        for nameField in marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="751"]'):
+            # print(name.attrib)
+            if nameField is not None:
+                code = nameField.find('{http://www.loc.gov/MARC21/slim}subfield[@code="4"]')
+                name = nameField.find('{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
+                if code.text == 'pup':
+                    data['normalizedPlace'] = name.text
+            else:
+                data['normalizedPlace'] = ''
 
 
         # publisher
@@ -70,17 +85,37 @@ def getData(record):
         else:
             data['publicationDate'] = ''
         # language
-        lang=marc.find('{http://www.loc.gov/MARC21/slim}datafield[@tag="041"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
-        if lang is not None:
-            data['language'] = lang.text
-        else:
-            data['language'] = ''
+        wlanglist = []
+        wlangs=marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="041"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
+        if wlangs is not None:
+            for wlang in wlangs:
+                wlanglist.append(wlang.text)
+                data['workLanguage'] = wlanglist
+
+        # original language
+        olanglist = []
+        olangs=marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="041"]/{http://www.loc.gov/MARC21/slim}subfield[@code="h"]')
+        if olangs is not None:
+            for olang in olangs:
+                olanglist.append(olang.text)
+                data['originalLanguage'] = olanglist
+
+        #intermediate language
+        ilanglist = []
+        ilangs=marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="041"]/{http://www.loc.gov/MARC21/slim}subfield[@code="k"]')
+        if ilangs is not None:
+            for ilang in ilangs:
+                ilanglist.append(ilang.text)
+                data['intermediateLanguage'] = ilanglist
+
         # genre/form
-        genre = marc.find('{http://www.loc.gov/MARC21/slim}datafield[@tag="655"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
-        if genre is not None:
-            data['genre'] = genre.text
-        else:
-            data['genre'] = ''
+        genreList = []
+        genres = marc.findall('{http://www.loc.gov/MARC21/slim}datafield[@tag="655"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
+        if genres is not None:
+            for genre in genres:
+                genreList.append(genre.text)
+                data['genre'] = genreList
+
 
         vd17ID = marc.find('{http://www.loc.gov/MARC21/slim}datafield[@tag="024"]/{http://www.loc.gov/MARC21/slim}subfield[@code="a"]')
         if vd17ID is not None:
