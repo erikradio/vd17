@@ -26,7 +26,7 @@ tables = soup.find_all("table")
 #         # We expect first td to be header,
 #         # second td to be data
 #         if len(row) != 2:
-#             continue  # Doesn't look like we expect
+#             continue  
 #         key, value = row[0], row[1]
 #         output_dict[key] = value
 #         headers.add(key)
